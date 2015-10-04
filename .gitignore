@@ -12,4 +12,6 @@ rebel.xml
 .DS_Store
 *.iml
 .idea/
+*.swp
+*.un~
 
