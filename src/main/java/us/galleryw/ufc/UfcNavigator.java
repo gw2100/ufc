@@ -22,31 +22,13 @@ import com.vaadin.ui.UI;
 @SuppressWarnings("serial")
 public class UfcNavigator extends Navigator {
     private Logger LOG = LoggerFactory.getLogger(UfcNavigator.class);
-
-    // Provide a Google Analytics tracker id here
-    private static final String TRACKER_ID = null;// "UA-658457-6";
-    private GoogleAnalyticsTracker tracker;
-
     private static final UfcViewType ERROR_VIEW = UfcViewType.DASHBOARD;
     private ViewProvider errorViewProvider;
 
     public UfcNavigator(final ComponentContainer container) {
         super(UI.getCurrent(), container);
-
-        String host = getUI().getPage().getLocation().getHost();
-        if (TRACKER_ID != null && host.endsWith("demo.vaadin.com")) {
-            initGATracker(TRACKER_ID);
-        }
         initViewChangeListener();
         initViewProviders();
-    }
-
-    private void initGATracker(final String trackerId) {
-        tracker = new GoogleAnalyticsTracker(trackerId, "demo.vaadin.com");
-
-        // GoogleAnalyticsTracker is an extension add-on for UI so it is
-        // initialized by calling .extend(UI)
-        tracker.extend(UI.getCurrent());
     }
 
     private void initViewChangeListener() {
@@ -63,10 +45,6 @@ public class UfcNavigator extends Navigator {
                 UfcEventBus.post(new PostViewChangeEvent(view));
                 UfcEventBus.post(new BrowserResizeEvent());
                 UfcEventBus.post(new CloseOpenWindowsEvent());
-                if (tracker != null) {
-                    // The view change is submitted as a pageview for GA tracker
-                    tracker.trackPageview("/dashboard/" + event.getViewName());
-                }
             }
         });
     }

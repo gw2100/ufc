@@ -6,11 +6,12 @@
 @import "views/sales";
 @import "views/transactions";
 @import "views/reports";
+@import "views/users";
 
 // Optimize the CSS output
 $v-included-components: remove($v-included-components, accordion);
 $v-included-components: remove($v-included-components, colorpicker);
-$v-included-components: remove($v-included-components, grid);
+//$v-included-components: remove($v-included-components, grid);
 $v-included-components: remove($v-included-components, popupview);
 $v-included-components: remove($v-included-components, progressbar);
 $v-included-components: remove($v-included-components, slider);
@@ -34,4 +35,5 @@ $valo-menu-background-color: #414B56;
   @include dashboard-sales-view;
   @include dashboard-transactions-view;
   @include dashboard-reports-view;
+  @include dashboard-users-view;
 }

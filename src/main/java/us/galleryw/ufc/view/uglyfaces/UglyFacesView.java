@@ -1,4 +1,4 @@
-package us.galleryw.ufc.view.users;
+package us.galleryw.ufc.view.uglyfaces;
 
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import us.galleryw.ufc.UfcUI;
+import us.galleryw.ufc.backend.UglyFace;
 import us.galleryw.ufc.backend.User;
 import us.galleryw.ufc.event.UfcEventBus;
 
@@ -25,20 +26,20 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings({ "serial", "unchecked" })
-public final class UsersView extends VerticalLayout implements View {
-    private Logger LOG = LoggerFactory.getLogger(UsersView.class);
+public final class UglyFacesView extends VerticalLayout implements View {
+    private Logger LOG = LoggerFactory.getLogger(UglyFacesView.class);
 
     private static final DateFormat DATEFORMAT = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss a");
     private static final DecimalFormat DECIMALFORMAT = new DecimalFormat("#.##");
     private static final String[] DEFAULT_COLLAPSIBLE = { "country", "city", "theater", "room", "title", "seats" };
 
     TextField filter = new TextField();
-    Grid userList = new Grid();
-    Button newUser = new Button("New user");
-    Button deleteUser = new Button("Delete user");
-    private UserForm userForm = new UserForm(this);
+    Grid entryList = new Grid();
+    Button newEntry = new Button("New uglyFace");
+    Button deleteEntry = new Button("Delete uglyFace");
+    private UglyFaceForm entryForm = new UglyFaceForm(this);
 
-    public UsersView() {
+    public UglyFacesView() {
         setSizeFull();
         addStyleName("users");
         UfcEventBus.register(this);
@@ -47,39 +48,35 @@ public final class UsersView extends VerticalLayout implements View {
     }
     private void configureComponents() {
 
-        newUser.addClickListener(e -> userForm.edit(new User()));
-        deleteUser.addClickListener(e -> {
-            UfcUI.getUserService().delete((User) userList.getSelectedRow());
+        newEntry.addClickListener(e -> entryForm.edit(new UglyFace()));
+        deleteEntry.addClickListener(e -> {
+            UfcUI.getUglyFaceService().delete((UglyFace) entryList.getSelectedRow());
             refreshList();
         });
 
-        filter.setInputPrompt("Filter users...");
+        filter.setInputPrompt("Filter...");
         filter.addTextChangeListener(e -> refreshList(e.getText()));
-        
-        userList.setContainerDataSource(new BeanItemContainer<>(User.class));
-        userList.setColumnOrder("id", "firstName", "lastName", "email");
-        userList.removeColumn("registrationDate");
-        userList.removeColumn("phone");
-        userList.setSelectionMode(Grid.SelectionMode.SINGLE);
-        userList.addSelectionListener(e -> {
-            userForm.edit((User) userList.getSelectedRow());
-            deleteUser.setVisible(userList.getSelectedRow() != null);
-        });
-        userList.setEditorEnabled(false);
-        userList.setSizeFull();
-        //userList.addStyleName(ValoTheme.TABLE_BORDERLESS);
-        //userList.addStyleName(ValoTheme.TABLE_NO_HORIZONTAL_LINES);
-        //userList.addStyleName(ValoTheme.TABLE_COMPACT);
 
+        entryList.setContainerDataSource(new BeanItemContainer<>(User.class));
+        // entryList.setColumnOrder("id", "firstName", "lastName", "email");
+        // entryList.removeColumn("registrationDate");
+        // entryList.removeColumn("phone");
+        entryList.setSelectionMode(Grid.SelectionMode.SINGLE);
+        entryList.addSelectionListener(e -> {
+            entryForm.edit((UglyFace) entryList.getSelectedRow());
+            deleteEntry.setVisible(entryList.getSelectedRow() != null);
+        });
+        entryList.setEditorEnabled(false);
+        entryList.setSizeFull();
         refreshList();
     }
     private void buildLayout() {
-        HorizontalLayout mainLayout = new HorizontalLayout(userList, userForm);
+        HorizontalLayout mainLayout = new HorizontalLayout(entryList, entryForm);
         mainLayout.setSizeFull();
         addComponent(buildToolbar());
         addComponent(mainLayout);
-        mainLayout.setExpandRatio(userList, 3);
-        mainLayout.setExpandRatio(userForm, 1);
+        mainLayout.setExpandRatio(entryList, 3);
+        mainLayout.setExpandRatio(entryForm, 1);
 
         setExpandRatio(mainLayout, 1);
     }
@@ -95,7 +92,7 @@ public final class UsersView extends VerticalLayout implements View {
         title.addStyleName(ValoTheme.LABEL_NO_MARGIN);
         header.addComponent(title);
 
-        HorizontalLayout tools = new HorizontalLayout(filter, newUser, deleteUser);
+        HorizontalLayout tools = new HorizontalLayout(filter, newEntry, deleteEntry);
         tools.setSpacing(true);
         tools.addStyleName("toolbar");
         header.addComponent(tools);
@@ -115,8 +112,8 @@ public final class UsersView extends VerticalLayout implements View {
     }
 
     private void refreshList(String stringFilter) {
-        userList.setContainerDataSource(new BeanItemContainer<>(User.class, UfcUI.getUserService().findAll(stringFilter)));
-        deleteUser.setVisible(userList.getSelectedRow() != null);
+        entryList.setContainerDataSource(new BeanItemContainer<>(UglyFace.class, UfcUI.getUglyFaceService().findAll(stringFilter)));
+        deleteEntry.setVisible(entryList.getSelectedRow() != null);
     }
 
     @Override

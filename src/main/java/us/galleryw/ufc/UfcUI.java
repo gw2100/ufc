@@ -7,6 +7,10 @@ import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Title;
 import com.vaadin.annotations.Widgetset;
 
+import us.galleryw.ufc.backend.UglyFaceService;
+import us.galleryw.ufc.backend.UglyFaceServiceHibernateImpl;
+import us.galleryw.ufc.backend.UserService;
+import us.galleryw.ufc.backend.UserServiceHibernateImpl;
 import us.galleryw.ufc.data.DataProvider;
 import us.galleryw.ufc.data.dummy.DummyDataProvider;
 import us.galleryw.ufc.domain.User;
@@ -27,6 +31,7 @@ import com.vaadin.server.VaadinSession;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 @Theme("dashboard")
@@ -43,6 +48,8 @@ public final class UfcUI extends UI {
      */
     private final DataProvider dataProvider = new DummyDataProvider();
     private final UfcEventBus dashboardEventbus = new UfcEventBus();
+    private final UserService userService = UserServiceHibernateImpl.createService();
+    private final UglyFaceService uglyFaceService = UglyFaceServiceHibernateImpl.createService();
 
     @Override
     protected void init(final VaadinRequest request) {
@@ -120,5 +127,11 @@ public final class UfcUI extends UI {
 
     public static UfcEventBus getDashboardEventbus() {
         return ((UfcUI) getCurrent()).dashboardEventbus;
+    }
+    public static UserService getUserService() {
+        return ((UfcUI) getCurrent()).userService;
+    }
+    public static UglyFaceService getUglyFaceService() {
+        return ((UfcUI) getCurrent()).uglyFaceService;
     }
 }

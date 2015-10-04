@@ -32,9 +32,9 @@ public class User implements Serializable, Cloneable {
     private String email = "";
     private Date registrationDate;
     private String password;
-    private Boolean isAdmin;
-//    @ManyToMany
-//    private List roles;
+    private String roles;
+    private Date lastUpdateDate;
+
 
     public Long getId() {
         return id;
@@ -108,13 +108,28 @@ public class User implements Serializable, Cloneable {
         this.password = password;
     }
 
-    public Boolean getIsAdmin() {
-        return isAdmin;
+ 
+    public String getRoles() {
+        return roles;
     }
 
-    public void setIsAdmin(Boolean isAdmin) {
-        this.isAdmin = isAdmin;
+    public void setRoles(String roles) {
+        this.roles = roles;
     }
+
+    public Date getLastUpdateDate() {
+        return lastUpdateDate;
+    }
+
+    public void setLastUpdateDate(Date lastUpdateDate) {
+        this.lastUpdateDate = lastUpdateDate;
+    }
+   public Boolean isAdmin() {
+        return roles==null?false:roles.contains("admin");
+    }
+   public String getName(){
+       return firstName+" "+lastName;
+   }
 
 //    public List getRoles() {
 //        return roles;

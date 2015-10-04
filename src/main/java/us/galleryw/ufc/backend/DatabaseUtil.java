@@ -68,6 +68,7 @@ public class DatabaseUtil {
                 p.setFirstName(fnames[r.nextInt(fnames.length)]);
                 p.setLastName(lnames[r.nextInt(lnames.length)]);
                 p.setEmail(p.getFirstName().toLowerCase() + "." + p.getLastName().toLowerCase() + "@vaadin.com");
+                //p.setIsAdmin(false);
                 int n = r.nextInt(100000);
                 if (n < 10000) {
                     n += 10000;

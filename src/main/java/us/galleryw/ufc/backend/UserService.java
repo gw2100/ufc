@@ -1,5 +1,6 @@
 package us.galleryw.ufc.backend;
 
+import java.io.Serializable;
 import java.util.List;
 
 public interface UserService {
@@ -8,6 +9,7 @@ public interface UserService {
     long count();
 
     void delete(User value);
+    void delete(Serializable id);
 
     void save(User entry);
 }

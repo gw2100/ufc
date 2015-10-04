@@ -1,10 +1,10 @@
-package us.galleryw.ufc;
+package us.galleryw.ufc.view.users;
 
+import us.galleryw.ufc.UfcUI;
 import us.galleryw.ufc.backend.User;
 
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.fieldgroup.FieldGroup;
-import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.event.ShortcutAction;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Notification.Type;
@@ -19,9 +19,8 @@ import com.vaadin.ui.themes.ValoTheme;
  * with @PropertyId annotation.
  */
 public class UserForm extends FormLayout {
-
-    Button save = new Button("Save", this::save);
-    Button cancel = new Button("Cancel", this::cancel);
+    Button saveButton = new Button("Save", this::save);
+    Button cancelButton = new Button("Cancel", this::cancel);
     TextField firstName = new TextField("First name");
     TextField lastName = new TextField("Last name");
     TextField phone = new TextField("Phone");
@@ -29,23 +28,26 @@ public class UserForm extends FormLayout {
     DateField registrationDate = new DateField("Registration date");
 
     User user;
+    UsersView parent;
 
     // Easily bind forms to beans and manage validation and buffering
-    BeanFieldGroup<User> formFieldBindings;
+    BeanFieldGroup<User> beanFieldGroup;
 
-    public UserForm() {
+    public UserForm(UsersView parent) {
+        this.parent = parent;
         configureComponents();
         buildLayout();
     }
 
     private void configureComponents() {
-        /* Highlight primary actions.
-         *
+        /*
+         * Highlight primary actions.
+         * 
          * With Vaadin built-in styles you can highlight the primary save button
          * and give it a keyboard shortcut for a better UX.
          */
-        save.setStyleName(ValoTheme.BUTTON_PRIMARY);
-        save.setClickShortcut(ShortcutAction.KeyCode.ENTER);
+        saveButton.setStyleName(ValoTheme.BUTTON_PRIMARY);
+        saveButton.setClickShortcut(ShortcutAction.KeyCode.ENTER);
         setVisible(false);
     }
 
@@ -53,55 +55,36 @@ public class UserForm extends FormLayout {
         setSizeUndefined();
         setMargin(true);
 
-        HorizontalLayout actions = new HorizontalLayout(save, cancel);
+        HorizontalLayout actions = new HorizontalLayout(saveButton, cancelButton);
         actions.setSpacing(true);
 
-		addComponents(actions, firstName, lastName, phone, email, registrationDate);
+        addComponents(actions, firstName, lastName, phone, email, registrationDate);
     }
 
     public void save(Button.ClickEvent event) {
         try {
-            formFieldBindings.commit();
-            //TODO:uncomment
-           // getUI().service.save(user);
-
-            String msg = String.format("Saved '%s %s'.",
-                    user.getFirstName(),
-                    user.getLastName());
-            Notification.show(msg,Type.TRAY_NOTIFICATION);
-            //TODO:uncomment
-            //getUI().refreshList();
+            beanFieldGroup.commit();
+            UfcUI.getUserService().save(user);
+            String msg = String.format("Saved '%s %s'.", user.getFirstName(), user.getLastName());
+            Notification.show(msg, Type.TRAY_NOTIFICATION);
+            parent.refreshList();
         } catch (FieldGroup.CommitException e) {
             // Validation exceptions could be shown here
         }
     }
 
     public void cancel(Button.ClickEvent event) {
-        // Place to call business logic.
         Notification.show("Cancelled", Type.TRAY_NOTIFICATION);
-        //TODO:uncomment
-        //getUI().userList.select(null);
+        parent.userList.select(null);
     }
 
-    void edit(User contact) {
-        this.user = contact;
-        if(contact != null) {
-            formFieldBindings = BeanFieldGroup.bindFieldsBuffered(contact, this);
+    public void edit(User user) {
+        this.user = user;
+        if (user != null) {
+            beanFieldGroup = BeanFieldGroup.bindFieldsBuffered(user, this);
             firstName.focus();
         }
-        setVisible(contact != null);
+        setVisible(user != null);
     }
-
-    void refreshList() {
-      //  refreshList(filter.getValue());
-    }
-
-    private void refreshList(String stringFilter) {
-//        userList.setContainerDataSource(new BeanItemContainer<>(User.class, service.findAll(stringFilter)));
-//        LOG.info("selectedRow=" + userList.getSelectedRow());
-//        System.out.println("system.out:selectedRow=" + userList.getSelectedRow());
-//        deleteUser.setVisible(userList.getSelectedRow() != null);
-    }
-
 
 }

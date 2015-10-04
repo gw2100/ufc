@@ -13,24 +13,24 @@ import java.util.logging.Logger;
 import org.hibernate.Session;
 import org.hibernate.StaleObjectStateException;
 
-public class UserServiceHibernateImpl implements UserService {
-    private static Logger LOG = Logger.getLogger(UserServiceHibernateImpl.class.getName());
-    private static UserService instance;
+public class UglyFaceServiceHibernateImpl implements UglyFaceService {
+    private static Logger LOG = Logger.getLogger(UglyFaceServiceHibernateImpl.class.getName());
+    private static UglyFaceService instance;
 
-    public static UserService createService() {
+    public static UglyFaceService createService() {
         if (instance == null) {
-            final UserServiceHibernateImpl contactService = new UserServiceHibernateImpl();
+            final UglyFaceServiceHibernateImpl contactService = new UglyFaceServiceHibernateImpl();
             instance = contactService;
         }
         return instance;
     }
 
-    public synchronized List<User> findAll(String stringFilter) {
-        List<User> filteredUsers = new ArrayList<User>();
-        List<User> allUsers = new ArrayList<User>();
+    public synchronized List<UglyFace> findAll(String stringFilter) {
+        List<UglyFace> filteredUsers = new ArrayList<UglyFace>();
+        List<UglyFace> allUsers = new ArrayList<UglyFace>();
         Session session = DatabaseUtil.getSessionFactory().getCurrentSession();
         try {
-            allUsers = session.createQuery(" from User").list();
+            allUsers = session.createQuery(" from UglyFace").list();
         } catch (StaleObjectStateException e) {
             LOG.log(Level.SEVERE, e.toString());
             if (session.getTransaction().isActive())
@@ -42,7 +42,7 @@ public class UserServiceHibernateImpl implements UserService {
                 session.getTransaction().rollback();
             throw e;
         }
-        for (User user : allUsers) {
+        for (UglyFace user : allUsers) {
             try {
                 boolean passesFilter = (stringFilter == null || stringFilter.isEmpty())
                         || user.toString().toLowerCase().contains(stringFilter.toLowerCase());
@@ -53,9 +53,9 @@ public class UserServiceHibernateImpl implements UserService {
                 LOG.log(Level.SEVERE, ex.toString());
             }
         }
-        Collections.sort(filteredUsers, new Comparator<User>() {
+        Collections.sort(filteredUsers, new Comparator<UglyFace>() {
             @Override
-            public int compare(User o1, User o2) {
+            public int compare(UglyFace o1, UglyFace o2) {
                 return (int) (o2.getId() - o1.getId());
             }
         });
@@ -80,23 +80,23 @@ public class UserServiceHibernateImpl implements UserService {
         }
     }
 
-    public synchronized void delete(User entry) {
+    public synchronized void delete(UglyFace entry) {
         Session session = DatabaseUtil.getSessionFactory().getCurrentSession();
         sessionHelp(session, entry, () -> session.delete(entry));
     }
     public synchronized void delete(Serializable id) {
         Session session = DatabaseUtil.getSessionFactory().getCurrentSession();
-        User user=(User)session.get(User.class, id);
+        UglyFace user=(UglyFace)session.get(UglyFace.class, id);
         sessionHelp(session, user, () -> session.delete(user));
     }
-    public synchronized void save(User entry) {
-        if(entry.getRegistrationDate()==null)
-            entry.setRegistrationDate(new Date());
+    public synchronized void save(UglyFace entry) {
+        if(entry.getUploadDate()==null)
+            entry.setUploadDate(new Date());
         Session session = DatabaseUtil.getSessionFactory().getCurrentSession();
         sessionHelp(session, entry, () -> session.saveOrUpdate(entry));
     }
 
-    private void sessionHelp(Session session, User user, Runnable shfi) {
+    private void sessionHelp(Session session, UglyFace user, Runnable shfi) {
         try {
             shfi.run();
         } catch (StaleObjectStateException e) {
