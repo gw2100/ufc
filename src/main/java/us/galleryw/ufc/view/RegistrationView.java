@@ -1,8 +1,12 @@
 package us.galleryw.ufc.view;
 
+import us.galleryw.ufc.UfcUI;
+import us.galleryw.ufc.backend.User;
 import us.galleryw.ufc.event.UfcEvent.UserLoginRequestedEvent;
 //import com.vaadin.demo.dashboard.event.DashboardEventBus;
 import us.galleryw.ufc.event.UfcEventBus;
+import us.galleryw.ufc.view.users.UserForm;
+import us.galleryw.ufc.view.users.UserFormParent;
 
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.server.FontAwesome;
@@ -25,9 +29,9 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
-public class LoginView extends VerticalLayout {
+public class RegistrationView extends VerticalLayout implements UserFormParent {
 
-    public LoginView() {
+    public RegistrationView() {
         setSizeFull();
 
         Component loginForm = buildLoginForm();
@@ -35,8 +39,7 @@ public class LoginView extends VerticalLayout {
         setComponentAlignment(loginForm, Alignment.MIDDLE_CENTER);
 
 //        Notification notification = new Notification("Welcome to Ugly Face Contest");
-//        notification
-//                .setDescription("<span>No username or password is required, just click the <b>Sign In</b> button to continue.</span>");
+//        notification.setDescription("<span>No username or password is required, just click the <b>Sign In</b> button to continue.</span>");
 //        notification.setHtmlContentAllowed(true);
 //        notification.setStyleName("tray dark small closable login-help");
 //        notification.setPosition(Position.BOTTOM_CENTER);
@@ -52,8 +55,9 @@ public class LoginView extends VerticalLayout {
         loginPanel.addStyleName("login-panel");
 
         loginPanel.addComponent(buildLabels());
-        loginPanel.addComponent(buildFields());
-        loginPanel.addComponent(new CheckBox("Remember me", false));
+        UserForm userForm=new UserForm(this);
+        userForm.edit(new User());
+        loginPanel.addComponent(userForm);
         return loginPanel;
     }
 
@@ -66,7 +70,6 @@ public class LoginView extends VerticalLayout {
         username.setValue("a.a1@vaadin.com");
         username.setIcon(FontAwesome.USER);
         username.addStyleName(ValoTheme.TEXTFIELD_INLINE_ICON);
-       
 
         final PasswordField password = new PasswordField("Password");
         password.setValue("password");
@@ -100,12 +103,17 @@ public class LoginView extends VerticalLayout {
         welcome.addStyleName(ValoTheme.LABEL_COLORED);
         labels.addComponent(welcome);
 
-        Label title = new Label("UglyFace Login");
+        Label title = new Label("New User Registration");
         title.setSizeUndefined();
         title.addStyleName(ValoTheme.LABEL_H3);
         title.addStyleName(ValoTheme.LABEL_LIGHT);
         labels.addComponent(title);
         return labels;
+    }
+
+    @Override
+    public void updateContent() {
+        ((UfcUI) UfcUI.getCurrent()).updateContent(new VisitorView());
     }
 
 }

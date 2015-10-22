@@ -1,6 +1,8 @@
 package us.galleryw.ufc.backend;
 
 import java.io.Serializable;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -13,8 +15,11 @@ import java.util.logging.Logger;
 import org.hibernate.Session;
 import org.hibernate.StaleObjectStateException;
 
-public class UserServiceHibernateImpl implements UserService {
-    private static Logger LOG = Logger.getLogger(UserServiceHibernateImpl.class.getName());
+//import us.galleryw.ufc.data.dummy.DummyDataGenerator;
+//import us.galleryw.ufc.domain.User;
+
+public class UserServiceHibernateImpl extends ServiceHibernateImplementation implements UserService {
+    static Logger LOG = Logger.getLogger(UserServiceHibernateImpl.class.getName());
     private static UserService instance;
 
     public static UserService createService() {
@@ -79,6 +84,16 @@ public class UserServiceHibernateImpl implements UserService {
             throw e;
         }
     }
+    
+    public synchronized User findByEmail(String email){
+        Session session = DatabaseUtil.getSessionFactory().getCurrentSession();
+        List<User> users=session.createQuery("from User where email='"+email+"'").list();
+        if(users==null|users.size()==0)
+            return null;
+        if(users.size()>1)
+            throw new RuntimeException(">1 users with same email");
+        return users.get(0);       
+    }
 
     public synchronized void delete(User entry) {
         Session session = DatabaseUtil.getSessionFactory().getCurrentSession();
@@ -95,22 +110,18 @@ public class UserServiceHibernateImpl implements UserService {
         Session session = DatabaseUtil.getSessionFactory().getCurrentSession();
         sessionHelp(session, entry, () -> session.saveOrUpdate(entry));
     }
-
-    private void sessionHelp(Session session, User user, Runnable shfi) {
+    
+    @Override
+    public User authenticate(String userName, String password) {
+        User user=findByEmail(userName);
         try {
-            shfi.run();
-        } catch (StaleObjectStateException e) {
-            LOG.log(Level.SEVERE, e.toString());
-            if (session.getTransaction().isActive())
-                session.getTransaction().rollback();
-            throw e;
-        } catch (Throwable e) {
-            LOG.log(Level.SEVERE, e.toString());
-            if (session.getTransaction().isActive())
-                session.getTransaction().rollback();
-            throw e;
+            if(user!=null&&PasswordHash.validatePassword(password, user.getPassword())){
+                return user;
+            }
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+            e.printStackTrace();
         }
-
+            return null;
     }
 
 }

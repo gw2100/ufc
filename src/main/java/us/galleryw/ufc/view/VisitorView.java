@@ -2,6 +2,8 @@ package us.galleryw.ufc.view;
 
 //import com.vaadin.demo.dashboard.DashboardNavigator;
 import us.galleryw.ufc.UfcNavigator;
+import us.galleryw.ufc.view.uglyfaces.UglyFacesUserView;
+import us.galleryw.ufc.view.uglyfaces.UglyFacesVisitorView;
 
 import com.vaadin.ui.ComponentContainer;
 import com.vaadin.ui.CssLayout;
@@ -12,9 +14,9 @@ import com.vaadin.ui.HorizontalLayout;
  * left and creates a simple container for the navigator on the right.
  */
 @SuppressWarnings("serial")
-public class MainView extends HorizontalLayout {
+public class VisitorView extends HorizontalLayout {
 
-    public MainView() {
+    public VisitorView() {
         setSizeFull();
         addStyleName("mainview");
         ComponentContainer content = new CssLayout();
@@ -23,6 +25,7 @@ public class MainView extends HorizontalLayout {
         content.addStyleName("view-content");
         content.setSizeFull();
         setExpandRatio(content, 1.0f);
-        new UfcNavigator(content);
+        content.addComponent(new UglyFacesVisitorView());
+        //new UfcNavigator(content);
     }
 }

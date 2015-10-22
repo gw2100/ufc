@@ -72,16 +72,16 @@ public class TBMainView extends TestBenchTestCase {
                 By.className("v-menubar-menuitem-caption")).getText();
     }
 
-    public TBDashboardView openDashboardView() {
-    	ButtonElement dashboard = getDashboardMenu().$(ButtonElement.class).caption("Dashboard").first();
-    	
-    	// TODO: This hack shouldn't be needed
-        new WebDriverWait(driver, 2).until(ExpectedConditions
-                .elementToBeClickable(dashboard));
-
-        dashboard.click();
-        return new TBDashboardView(driver);
-    }
+//    public TBDashboardView openDashboardView() {
+//    	ButtonElement dashboard = getDashboardMenu().$(ButtonElement.class).caption("Dashboard").first();
+//    	
+//    	// TODO: This hack shouldn't be needed
+//        new WebDriverWait(driver, 2).until(ExpectedConditions
+//                .elementToBeClickable(dashboard));
+//
+//        dashboard.click();
+//        return new TBDashboardView(driver);
+//    }
 
     public int getUnreadNotificationsCount() {
         int result = 0;
@@ -94,16 +94,16 @@ public class TBMainView extends TestBenchTestCase {
         return result;
     }
 
-    public TBTransactionsView openTransactionsView() {
-    	ButtonElement transactions = getDashboardMenu().$(ButtonElement.class).caption("Transactions").first();
-    	
-    	// TODO: This hack shouldn't be needed
-        new WebDriverWait(driver, 2).until(ExpectedConditions
-                .elementToBeClickable(transactions));
-
-        transactions.click();
-        return new TBTransactionsView(driver);
-    }
+//    public TBTransactionsView openTransactionsView() {
+//    	ButtonElement transactions = getDashboardMenu().$(ButtonElement.class).caption("Transactions").first();
+//    	
+//    	// TODO: This hack shouldn't be needed
+//        new WebDriverWait(driver, 2).until(ExpectedConditions
+//                .elementToBeClickable(transactions));
+//
+//        transactions.click();
+//        return new TBTransactionsView(driver);
+//    }
 
     public int getReportsCount() {
         int result = 0;
@@ -116,14 +116,14 @@ public class TBMainView extends TestBenchTestCase {
         return result;
     }
 
-    public TBReportsView openReportsView() {
-    	ButtonElement reports = getDashboardMenu().$(ButtonElement.class).caption("Reports").first();
-    	
-    	// TODO: This hack shouldn't be needed
-        new WebDriverWait(driver, 2).until(ExpectedConditions
-                .elementToBeClickable(reports));
-
-        reports.click();
-        return new TBReportsView(driver);
-    }
+//    public TBReportsView openReportsView() {
+//    	ButtonElement reports = getDashboardMenu().$(ButtonElement.class).caption("Reports").first();
+//    	
+//    	// TODO: This hack shouldn't be needed
+//        new WebDriverWait(driver, 2).until(ExpectedConditions
+//                .elementToBeClickable(reports));
+//
+//        reports.click();
+//        return new TBReportsView(driver);
+//    }
 }

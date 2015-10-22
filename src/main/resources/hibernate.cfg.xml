@@ -18,8 +18,14 @@
   <property name="hibernate.show_sql">true</property>
   <property name="hibernate.hbm2ddl.auto">create</property>
 
-  <mapping class="us.galleryw.ufc.backend.User"/>
+<!--   <mapping class="us.galleryw.ufc.backend.User"/>
   <mapping class="us.galleryw.ufc.backend.Vote"/>
   <mapping class="us.galleryw.ufc.backend.UglyFace"/>
+  <mapping class="us.galleryw.ufc.backend.Comment"/> -->
+
+  <mapping resource="us/galleryw/ufc/backend/User.hbm.xml"/>
+  <mapping resource="us/galleryw/ufc/backend/UglyFace.hbm.xml"/>
+  <mapping resource="us/galleryw/ufc/backend/Vote.hbm.xml"/>
+  <mapping resource="us/galleryw/ufc/backend/Comment.hbm.xml"/>
  </session-factory>
 </hibernate-configuration>

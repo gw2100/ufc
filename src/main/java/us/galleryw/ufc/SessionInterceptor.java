@@ -9,6 +9,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebFilter;
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.lf5.LogLevel;
 import org.hibernate.Session;
@@ -43,6 +44,10 @@ public class SessionInterceptor implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException,
             ServletException {
+        String path = ((HttpServletRequest) request).getRequestURI();
+        if (path.startsWith("/ufcimg")) {
+            chain.doFilter(request, response); // Just continue chain.
+        } else {
         final Session session = DatabaseUtil.getSessionFactory().getCurrentSession();
         try {
             if (!session.getTransaction().isActive())
@@ -67,5 +72,6 @@ public class SessionInterceptor implements Filter {
 
             throw new ServletException(e);
         }
+    }
     }
 }

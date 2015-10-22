@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd" >
+<hibernate-mapping package="us.galleryw.ufc.backend">
+ <class name="Comment" table="COMMENT">
+  <id name="Id" column="id">
+   <generator class="increment"/>
+  </id>
+  <property name="text"/>
+  <many-to-one name="uglyFace"  class="UglyFace">
+   <column name="uglyface_id" not-null="true"/>
+  </many-to-one>
+
+ </class>
+
+</hibernate-mapping>

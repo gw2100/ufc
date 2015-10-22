@@ -12,4 +12,6 @@ public interface UserService {
     void delete(Serializable id);
 
     void save(User entry);
+
+    User authenticate(String userName, String password);
 }

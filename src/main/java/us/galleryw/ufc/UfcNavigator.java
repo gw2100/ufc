@@ -22,7 +22,8 @@ import com.vaadin.ui.UI;
 @SuppressWarnings("serial")
 public class UfcNavigator extends Navigator {
     private Logger LOG = LoggerFactory.getLogger(UfcNavigator.class);
-    private static final UfcViewType ERROR_VIEW = UfcViewType.DASHBOARD;
+    //private static final UfcViewType ERROR_VIEW = UfcViewType.DASHBOARD;
+    private static final UfcViewType ERROR_VIEW = UfcViewType.UGLYFACES;
     private ViewProvider errorViewProvider;
 
     public UfcNavigator(final ComponentContainer container) {
@@ -59,7 +60,6 @@ public class UfcNavigator extends Navigator {
                     View result = null;
                     if (viewType.getViewName().equals(viewName)) {
                         if (viewType.isStateful()) {
-                            // Stateful views get lazily instantiated
                             if (cachedInstance == null) {
                                 cachedInstance = super.getView(viewType.getViewName());
                             }

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd" >
+<hibernate-mapping package="us.galleryw.ufc.backend">
+ <class name="Vote" table="VOTE">
+  <id name="Id" column="id">
+   <generator class="increment"/>
+  </id>
+  <properties name="uglyface_id_voter_id" unique="true">
+   <many-to-one name="uglyFace" class="UglyFace">
+    <column name="uglyface_id"/>
+   </many-to-one>
+   <many-to-one name="voter" class="User">
+    <column name="voter_id"/>
+   </many-to-one>
+  </properties>
+  <property name="votingIp"/>
+  <property name="votingDate" type="date"/>
+ </class>
+</hibernate-mapping>

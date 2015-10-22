@@ -1,6 +1,13 @@
 package us.galleryw.ufc.view.users;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import us.galleryw.ufc.UfcUI;
+import us.galleryw.ufc.backend.PasswordHash;
 import us.galleryw.ufc.backend.User;
 
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
@@ -19,21 +26,25 @@ import com.vaadin.ui.themes.ValoTheme;
  * with @PropertyId annotation.
  */
 public class UserForm extends FormLayout {
+    private Logger LOG = LoggerFactory.getLogger(UserForm.class);
     Button saveButton = new Button("Save", this::save);
     Button cancelButton = new Button("Cancel", this::cancel);
     TextField firstName = new TextField("First name");
     TextField lastName = new TextField("Last name");
     TextField phone = new TextField("Phone");
     TextField email = new TextField("Email");
-    DateField registrationDate = new DateField("Registration date");
-
+    PasswordField password = new PasswordField("Password");
+    //DateField registrationDate = new DateField("Registration date");
+    TextField state = new TextField("");
+    
+    
     User user;
-    UsersView parent;
+    UserFormParent parent;
 
     // Easily bind forms to beans and manage validation and buffering
     BeanFieldGroup<User> beanFieldGroup;
 
-    public UserForm(UsersView parent) {
+    public UserForm(UserFormParent parent) {
         this.parent = parent;
         configureComponents();
         buildLayout();
@@ -57,25 +68,29 @@ public class UserForm extends FormLayout {
 
         HorizontalLayout actions = new HorizontalLayout(saveButton, cancelButton);
         actions.setSpacing(true);
-
-        addComponents(actions, firstName, lastName, phone, email, registrationDate);
+        state.setStyleName("honeyadd");
+        addComponents(actions, firstName, lastName, phone, email,password,state);
     }
 
     public void save(Button.ClickEvent event) {
         try {
+            if(state.getValue().length()>0)  //robot filling form
+                return;
             beanFieldGroup.commit();
+            user.setPassword(PasswordHash.createHash(password.getValue()));
             UfcUI.getUserService().save(user);
             String msg = String.format("Saved '%s %s'.", user.getFirstName(), user.getLastName());
             Notification.show(msg, Type.TRAY_NOTIFICATION);
-            parent.refreshList();
-        } catch (FieldGroup.CommitException e) {
-            // Validation exceptions could be shown here
+            parent.updateContent();
+        } catch (FieldGroup.CommitException | NoSuchAlgorithmException | InvalidKeySpecException e) {
+            LOG.error("",e);
         }
     }
 
     public void cancel(Button.ClickEvent event) {
         Notification.show("Cancelled", Type.TRAY_NOTIFICATION);
-        parent.userList.select(null);
+        //parent.userList.select(null);
+        parent.updateContent();
     }
 
     public void edit(User user) {

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd" >
+<hibernate-mapping package="us.galleryw.ufc.backend">
+ <class name="UglyFace" table="UGLYFACE">
+  <id name="Id" column="id">
+   <generator class="increment"/>
+  </id>
+  <many-to-one name="owner" class="User">
+   <column name="owner_id"/>
+  </many-to-one>
+  <set name="votes" cascade="all">
+   <key column="uglyface_id"/>
+   <one-to-many class="Vote"/>
+  </set>
+  <property name="image" type="byte[]" length="1000000"/>
+  <property name="thumbnail" type="byte[]" length="500000"/>
+  <property name="uploadDate" type="date"/>
+  <property name="name"/>
+  <property name="description"/>
+  <set name="comments" cascade="all">
+   <key column="uglyface_id"/>
+   <one-to-many class="Comment"/>
+  </set>
+ </class>
+</hibernate-mapping>
+

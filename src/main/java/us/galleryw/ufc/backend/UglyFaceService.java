@@ -5,11 +5,13 @@ import java.util.List;
 
 public interface UglyFaceService {
     List<UglyFace> findAll(String stringFilter);
-
+    UglyFace findById(Serializable id);
     long count();
 
     void delete(UglyFace value);
     void delete(Serializable id);
 
-    void save(UglyFace entry);
+    Serializable save(UglyFace entry);
+     void persist(UglyFace entry);
+     UglyFace merge(UglyFace entry);
 }

@@ -2,6 +2,7 @@ package us.galleryw.ufc.event;
 
 import java.util.Collection;
 
+import us.galleryw.ufc.backend.User;
 import us.galleryw.ufc.domain.Transaction;
 import us.galleryw.ufc.view.UfcViewType;
 
@@ -83,6 +84,17 @@ public abstract class UfcEvent {
     }
 
     public static class ProfileUpdatedEvent {
+        private User user;
+        public ProfileUpdatedEvent(User user){
+            this.user=user;
+        }
+        public User getUser() {
+            return user;
+        }
+        public void setUser(User user) {
+            this.user = user;
+        }
+        
     }
 
 }

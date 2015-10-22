@@ -13,7 +13,7 @@ import java.util.logging.Logger;
 import org.hibernate.Session;
 import org.hibernate.StaleObjectStateException;
 
-public class UglyFaceServiceHibernateImpl implements UglyFaceService {
+public class UglyFaceServiceHibernateImpl extends ServiceHibernateImplementation implements UglyFaceService {
     private static Logger LOG = Logger.getLogger(UglyFaceServiceHibernateImpl.class.getName());
     private static UglyFaceService instance;
 
@@ -26,11 +26,12 @@ public class UglyFaceServiceHibernateImpl implements UglyFaceService {
     }
 
     public synchronized List<UglyFace> findAll(String stringFilter) {
-        List<UglyFace> filteredUsers = new ArrayList<UglyFace>();
-        List<UglyFace> allUsers = new ArrayList<UglyFace>();
+        List<UglyFace> filteredFaces = new ArrayList<UglyFace>();
+        List<UglyFace> allFaces = new ArrayList<UglyFace>();
         Session session = DatabaseUtil.getSessionFactory().getCurrentSession();
         try {
-            allUsers = session.createQuery(" from UglyFace").list();
+            allFaces = session.createQuery(" from UglyFace").list();
+            LOG.info("allFaces.size="+allFaces.size());
         } catch (StaleObjectStateException e) {
             LOG.log(Level.SEVERE, e.toString());
             if (session.getTransaction().isActive())
@@ -42,24 +43,24 @@ public class UglyFaceServiceHibernateImpl implements UglyFaceService {
                 session.getTransaction().rollback();
             throw e;
         }
-        for (UglyFace user : allUsers) {
+        for (UglyFace uglyFace : allFaces) {
             try {
                 boolean passesFilter = (stringFilter == null || stringFilter.isEmpty())
-                        || user.toString().toLowerCase().contains(stringFilter.toLowerCase());
+                        || uglyFace.toString().toLowerCase().contains(stringFilter.toLowerCase());
                 if (passesFilter) {
-                    filteredUsers.add(user.clone());
+                    filteredFaces.add(uglyFace.clone());
                 }
             } catch (CloneNotSupportedException ex) {
                 LOG.log(Level.SEVERE, ex.toString());
             }
         }
-        Collections.sort(filteredUsers, new Comparator<UglyFace>() {
+        Collections.sort(filteredFaces, new Comparator<UglyFace>() {
             @Override
             public int compare(UglyFace o1, UglyFace o2) {
                 return (int) (o2.getId() - o1.getId());
             }
         });
-        return filteredUsers;
+        return filteredFaces;
     }
 
     public synchronized long count() {
@@ -79,38 +80,41 @@ public class UglyFaceServiceHibernateImpl implements UglyFaceService {
             throw e;
         }
     }
-
+    public synchronized UglyFace findById(Serializable id) {
+        Session session = DatabaseUtil.getSessionFactory().getCurrentSession();
+        return (UglyFace)session.get(UglyFace.class, id);   
+    }
     public synchronized void delete(UglyFace entry) {
         Session session = DatabaseUtil.getSessionFactory().getCurrentSession();
         sessionHelp(session, entry, () -> session.delete(entry));
     }
     public synchronized void delete(Serializable id) {
         Session session = DatabaseUtil.getSessionFactory().getCurrentSession();
-        UglyFace user=(UglyFace)session.get(UglyFace.class, id);
-        sessionHelp(session, user, () -> session.delete(user));
+        UglyFace uglyFace=(UglyFace)session.get(UglyFace.class, id);
+        sessionHelp(session, uglyFace, () -> session.delete(uglyFace));
     }
-    public synchronized void save(UglyFace entry) {
+    public synchronized Serializable save(UglyFace entry) {
+        LOG.info("uglyFace="+entry);
         if(entry.getUploadDate()==null)
             entry.setUploadDate(new Date());
         Session session = DatabaseUtil.getSessionFactory().getCurrentSession();
-        sessionHelp(session, entry, () -> session.saveOrUpdate(entry));
+        Serializable s=session.save(entry);
+        session.flush();
+        return s;
+    }
+    public synchronized UglyFace merge(UglyFace entry) {
+        LOG.info("uglyFace="+entry);
+        if(entry.getUploadDate()==null)
+            entry.setUploadDate(new Date());
+        Session session = DatabaseUtil.getSessionFactory().getCurrentSession();
+        UglyFace u= (UglyFace) session.merge(entry);
+        session.flush();
+        return u;
+    }
+    public synchronized void persist(UglyFace entry) {
+        Session session = DatabaseUtil.getSessionFactory().getCurrentSession();
+        sessionHelp(session, entry, () -> session.persist(entry));
     }
 
-    private void sessionHelp(Session session, UglyFace user, Runnable shfi) {
-        try {
-            shfi.run();
-        } catch (StaleObjectStateException e) {
-            LOG.log(Level.SEVERE, e.toString());
-            if (session.getTransaction().isActive())
-                session.getTransaction().rollback();
-            throw e;
-        } catch (Throwable e) {
-            LOG.log(Level.SEVERE, e.toString());
-            if (session.getTransaction().isActive())
-                session.getTransaction().rollback();
-            throw e;
-        }
-
-    }
 
 }

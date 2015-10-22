@@ -25,13 +25,20 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings({ "serial", "unchecked" })
-public final class UsersView extends VerticalLayout implements View {
+public final class UsersView extends VerticalLayout implements View, UserFormParent {
     private Logger LOG = LoggerFactory.getLogger(UsersView.class);
 
     private static final DateFormat DATEFORMAT = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss a");
     private static final DecimalFormat DECIMALFORMAT = new DecimalFormat("#.##");
     private static final String[] DEFAULT_COLLAPSIBLE = { "country", "city", "theater", "room", "title", "seats" };
-
+    public static final String ID="id";
+    public static final String FIRST_NAME="firstName";
+    public static final String LAST_NAME="lastName";
+    public static final String EMAIL="email";
+    public static final String THUMBNAIL="thumbnail";
+    public static final String PHONE="phone";
+    public static final String ROLES="roles";
+ 
     TextField filter = new TextField();
     Grid userList = new Grid();
     Button newUser = new Button("New user");
@@ -50,16 +57,19 @@ public final class UsersView extends VerticalLayout implements View {
         newUser.addClickListener(e -> userForm.edit(new User()));
         deleteUser.addClickListener(e -> {
             UfcUI.getUserService().delete((User) userList.getSelectedRow());
-            refreshList();
+            updateContent();
         });
 
         filter.setInputPrompt("Filter users...");
         filter.addTextChangeListener(e -> refreshList(e.getText()));
         
         userList.setContainerDataSource(new BeanItemContainer<>(User.class));
-        userList.setColumnOrder("id", "firstName", "lastName", "email");
         userList.removeColumn("registrationDate");
         userList.removeColumn("phone");
+        userList.removeColumn("gender");
+        userList.removeColumn("location");
+        userList.removeColumn("password");
+      
         userList.setSelectionMode(Grid.SelectionMode.SINGLE);
         userList.addSelectionListener(e -> {
             userForm.edit((User) userList.getSelectedRow());
@@ -70,15 +80,15 @@ public final class UsersView extends VerticalLayout implements View {
         //userList.addStyleName(ValoTheme.TABLE_BORDERLESS);
         //userList.addStyleName(ValoTheme.TABLE_NO_HORIZONTAL_LINES);
         //userList.addStyleName(ValoTheme.TABLE_COMPACT);
-
-        refreshList();
+        userList.setColumnOrder(ID,FIRST_NAME,LAST_NAME,EMAIL,THUMBNAIL,ROLES);
+        updateContent();
     }
     private void buildLayout() {
         HorizontalLayout mainLayout = new HorizontalLayout(userList, userForm);
         mainLayout.setSizeFull();
         addComponent(buildToolbar());
         addComponent(mainLayout);
-        mainLayout.setExpandRatio(userList, 3);
+        mainLayout.setExpandRatio(userList, 2);
         mainLayout.setExpandRatio(userForm, 1);
 
         setExpandRatio(mainLayout, 1);
@@ -110,7 +120,11 @@ public final class UsersView extends VerticalLayout implements View {
         UfcEventBus.unregister(this);
     }
 
-    void refreshList() {
+    /* (non-Javadoc)
+     * @see us.galleryw.ufc.view.users.UserFormParent#updateContent()
+     */
+    @Override
+    public void updateContent() {
         refreshList(filter.getValue());
     }
 

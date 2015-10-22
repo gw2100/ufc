@@ -3,8 +3,6 @@ package us.galleryw.ufc.backend;
 import java.util.Date;
 import java.util.Random;
 
-
-
 //import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -26,8 +24,9 @@ public class DatabaseUtil {
                     .buildServiceRegistry();
 
             sessionFactory = configuration.buildSessionFactory(serviceRegistry);
-            insertExampleData();
+           insertExampleData();
         } catch (Throwable e) {
+            e.printStackTrace();
             throw new ExceptionInInitializerError(e);
         }
     }
@@ -42,10 +41,8 @@ public class DatabaseUtil {
 
     public static void insertExampleData() {
         logger.info("insertExampleData");
-        final String[] fnames = { "Peter", "Alice", "Joshua", "Mike", "Olivia", "Nina", "Alex", "Rita", "Dan", "Umberto", "Henrik", "Rene",
-                "Lisa", "Marge" };
-        final String[] lnames = { "Smith", "Gordon", "Simpson", "Brown", "Clavel", "Simons", "Verne", "Scott", "Allison", "Gates",
-                "Rowling", "Barks", "Ross", "Schneider", "Tate" };
+        final String[] fnames = { "a", "Alice", "Joshua", "Mike", "Olivia", "Nina", "Alex", "Rita", "Dan", "Umberto", "u", "z", };
+        final String[] lnames = { "a1", "Gordon", "Simpson", "Brown", "Clavel", "Simons", "Verne", "Scott", "Allison", "Gates", "u1", "z1" };
         final String cities[] = { "Amsterdam", "Berlin", "Helsinki", "Hong Kong", "London", "Luxemburg", "New York", "Oslo", "Paris",
                 "Rome", "Stockholm", "Tokyo", "Turku" };
         final String streets[] = { "4215 Blandit Av.", "452-8121 Sem Ave", "279-4475 Tellus Road", "4062 Libero. Av.", "7081 Pede. Ave",
@@ -63,16 +60,17 @@ public class DatabaseUtil {
         Transaction transaction = sess.beginTransaction();
 
         try {
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < fnames.length; i++) {
                 User p = new User();
-                p.setFirstName(fnames[r.nextInt(fnames.length)]);
-                p.setLastName(lnames[r.nextInt(lnames.length)]);
+                p.setFirstName(fnames[i]);
+                p.setLastName(lnames[i]);
                 p.setEmail(p.getFirstName().toLowerCase() + "." + p.getLastName().toLowerCase() + "@vaadin.com");
-                //p.setIsAdmin(false);
-                int n = r.nextInt(100000);
-                if (n < 10000) {
-                    n += 10000;
-                }
+                if (i < 4)
+                    p.setRoles("user,admin");
+                else
+                    p.setRoles("user");
+                p.setPassword(PasswordHash.createHash("password"));
+
                 p.setRegistrationDate(new Date());
                 sess.saveOrUpdate(p);
             }

@@ -3,9 +3,10 @@ package us.galleryw.ufc.view;
 import java.util.Collection;
 
 import us.galleryw.ufc.UfcUI;
+import us.galleryw.ufc.backend.User;
 import us.galleryw.ufc.component.ProfilePreferencesWindow;
 import us.galleryw.ufc.domain.Transaction;
-import us.galleryw.ufc.domain.User;
+//import us.galleryw.ufc.domain.User;
 import us.galleryw.ufc.event.UfcEvent.NotificationsCountUpdatedEvent;
 import us.galleryw.ufc.event.UfcEvent.PostViewChangeEvent;
 import us.galleryw.ufc.event.UfcEvent.ProfileUpdatedEvent;
@@ -16,6 +17,7 @@ import com.google.common.eventbus.Subscribe;
 
 import us.galleryw.ufc.event.UfcEvent.TransactionReportEvent;
 import us.galleryw.ufc.event.UfcEvent.UserLoggedOutEvent;
+
 import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.DropHandler;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
@@ -65,7 +67,6 @@ public final class UfcMenu extends CustomComponent {
         // There's only one DashboardMenu per UI so this doesn't need to be
         // unregistered from the UI-scoped DashboardEventBus.
         UfcEventBus.register(this);
-
         setCompositionRoot(buildContent());
     }
 
@@ -79,10 +80,14 @@ public final class UfcMenu extends CustomComponent {
         menuContent.setHeight("100%");
 
         menuContent.addComponent(buildTitle());
-        menuContent.addComponent(buildUserMenu());
-        menuContent.addComponent(buildToggleButton());
-        menuContent.addComponent(buildMenuItems());
-
+        if (UfcUI.getCurrentUser() == null)
+            menuContent.addComponent(buildVisitorMenu());
+        else {
+            menuContent.addComponent(buildUserMenu());
+            menuContent.addComponent(buildToggleButton());
+            if (UfcUI.getCurrentUser().isAdmin())
+                menuContent.addComponent(buildMenuItems());
+        }
         return menuContent;
     }
 
@@ -95,26 +100,16 @@ public final class UfcMenu extends CustomComponent {
         return logoWrapper;
     }
 
-    private User getCurrentUser() {
-        return (User) VaadinSession.getCurrent().getAttribute(User.class.getName());
-    }
-
     private Component buildUserMenu() {
         final MenuBar settings = new MenuBar();
         settings.addStyleName("user-menu");
-        final User user = getCurrentUser();
+        final User user = UfcUI.getCurrentUser();
         settingsItem = settings.addItem("", new ThemeResource("img/profile-pic-300px.jpg"), null);
-        updateUserName(null);
+        updateUserFirstLastName(null);
         settingsItem.addItem("Edit Profile", new Command() {
             @Override
             public void menuSelected(final MenuItem selectedItem) {
                 ProfilePreferencesWindow.open(user, false);
-            }
-        });
-        settingsItem.addItem("Preferences", new Command() {
-            @Override
-            public void menuSelected(final MenuItem selectedItem) {
-                ProfilePreferencesWindow.open(user, true);
             }
         });
         settingsItem.addSeparator();
@@ -126,8 +121,39 @@ public final class UfcMenu extends CustomComponent {
         });
         return settings;
     }
+    private Component buildVisitorMenu() {
+        final MenuBar settings = new MenuBar();
+        settings.addStyleName("user-menu");
+        settingsItem = settings.addItem("", new ThemeResource("img/profile-pic-300px.jpg"), null);
+        settingsItem.setText("Guest");
+        settingsItem.addItem("Login", new Command() {
+            @Override
+            public void menuSelected(final MenuItem selectedItem) {
+                ((UfcUI) UfcUI.getCurrent()).updateContent(new LoginView());
+            }
+        });
+        settingsItem.addSeparator();
+        settingsItem.addItem("Register", new Command() {
+            @Override
+            public void menuSelected(final MenuItem selectedItem) {
+                ((UfcUI) UfcUI.getCurrent()).updateContent(new RegistrationView());
+            }
+        });
+        return settings;
+    }
+ 
+    private Component buildMenuItems() {
+        CssLayout menuItemsLayout = new CssLayout();
+        menuItemsLayout.addStyleName("valo-menuitems");
 
-    private Component buildToggleButton() {
+        for (final UfcViewType view : UfcViewType.values()) {
+            Component menuItemComponent = new ValoMenuItemButton(view);
+            menuItemsLayout.addComponent(menuItemComponent);
+        }
+        return menuItemsLayout;
+
+    }
+   private Component buildToggleButton() {
         Button valoMenuToggleButton = new Button("Menu", new ClickListener() {
             @Override
             public void buttonClick(final ClickEvent event) {
@@ -145,53 +171,6 @@ public final class UfcMenu extends CustomComponent {
         return valoMenuToggleButton;
     }
 
-    private Component buildMenuItems() {
-        CssLayout menuItemsLayout = new CssLayout();
-        menuItemsLayout.addStyleName("valo-menuitems");
-
-        for (final UfcViewType view : UfcViewType.values()) {
-            Component menuItemComponent = new ValoMenuItemButton(view);
-
-            if (view == UfcViewType.REPORTS) {
-                // Add drop target to reports button
-                DragAndDropWrapper reports = new DragAndDropWrapper(menuItemComponent);
-                reports.setSizeUndefined();
-                reports.setDragStartMode(DragStartMode.NONE);
-                reports.setDropHandler(new DropHandler() {
-
-                    @Override
-                    public void drop(final DragAndDropEvent event) {
-                        UI.getCurrent().getNavigator().navigateTo(UfcViewType.REPORTS.getViewName());
-                        Table table = (Table) event.getTransferable().getSourceComponent();
-                        UfcEventBus.post(new TransactionReportEvent((Collection<Transaction>) table.getValue()));
-                    }
-
-                    @Override
-                    public AcceptCriterion getAcceptCriterion() {
-                        return AcceptItem.ALL;
-                    }
-
-                });
-                menuItemComponent = reports;
-            }
-
-            if (view == UfcViewType.DASHBOARD) {
-                notificationsBadge = new Label();
-                notificationsBadge.setId(NOTIFICATIONS_BADGE_ID);
-                menuItemComponent = buildBadgeWrapper(menuItemComponent, notificationsBadge);
-            }
-            if (view == UfcViewType.REPORTS) {
-                reportsBadge = new Label();
-                reportsBadge.setId(REPORTS_BADGE_ID);
-                menuItemComponent = buildBadgeWrapper(menuItemComponent, reportsBadge);
-            }
-
-            menuItemsLayout.addComponent(menuItemComponent);
-        }
-        return menuItemsLayout;
-
-    }
-
     private Component buildBadgeWrapper(final Component menuItemButton, final Component badgeLabel) {
         CssLayout dashboardWrapper = new CssLayout(menuItemButton);
         dashboardWrapper.addStyleName("badgewrapper");
@@ -206,7 +185,6 @@ public final class UfcMenu extends CustomComponent {
     @Override
     public void attach() {
         super.attach();
-        updateNotificationsCount(null);
     }
 
     @Subscribe
@@ -216,30 +194,14 @@ public final class UfcMenu extends CustomComponent {
     }
 
     @Subscribe
-    public void updateNotificationsCount(final NotificationsCountUpdatedEvent event) {
-        int unreadNotificationsCount = UfcUI.getDataProvider().getUnreadNotificationsCount();
-        notificationsBadge.setValue(String.valueOf(unreadNotificationsCount));
-        notificationsBadge.setVisible(unreadNotificationsCount > 0);
-    }
-
-    @Subscribe
-    public void updateReportsCount(final ReportsCountUpdatedEvent event) {
-        reportsBadge.setValue(String.valueOf(event.getCount()));
-        reportsBadge.setVisible(event.getCount() > 0);
-    }
-
-    @Subscribe
-    public void updateUserName(final ProfileUpdatedEvent event) {
-        User user = getCurrentUser();
+    public void updateUserFirstLastName(final ProfileUpdatedEvent event) {
+        User user = UfcUI.getCurrentUser();
         settingsItem.setText(user.getFirstName() + " " + user.getLastName());
     }
 
     public final class ValoMenuItemButton extends Button {
-
         private static final String STYLE_SELECTED = "selected";
-
         private final UfcViewType view;
-
         public ValoMenuItemButton(final UfcViewType view) {
             this.view = view;
             setPrimaryStyleName("valo-menu-item");
@@ -252,7 +214,6 @@ public final class UfcMenu extends CustomComponent {
                     UI.getCurrent().getNavigator().navigateTo(view.getViewName());
                 }
             });
-
         }
 
         @Subscribe
